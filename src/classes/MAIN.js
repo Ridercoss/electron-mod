@@ -1,15 +1,60 @@
 const { app, BrowserWindow, ipcMain } = require("electron")
-const path = require('path')
+const os = require("os")
 
-class Main {
+/**
+ * @class MAIN
+ */
+class MAIN {
 
+    /**
+     * 
+     * @param { String } env 
+     */
     constructor( env ) {
         this.ENV = env
         this.BOXES = {}
     }
 
-    REG_BOX( BOX ) {
-        this.BOXES[module.name] = module
+    REG_BOX( item ) {
+
+        if ( item.constructor.name == 'Array' ) {
+
+            for (let box of item) {
+                this.BOXES[box.boxName] = box
+            }
+
+        } else if ( item.constructor.name == 'BOX') {
+            
+            this.BOXES[item.boxName] = item
+
+        }
+
+    }
+
+    SWITCH_BOX( boxToClose, boxToOpen ) {
+        this.BOXES[boxToClose].WINDOW_GET().hide()
+        this.BOXES[boxToOpen].WINDOW_BUILD()
+        this.BOXES[boxToClose].WINDOW_GET().close()
+    }
+
+    OPEN_BOX( boxToOpen ) {
+        this.BOXES[boxToOpen].WINDOW_BUILD()
+    }
+
+    IPC() {
+        return ipcMain
+    }
+
+    APP_GET() {
+        return app
+    }
+
+    OS_GET() {
+        return os
+    }
+
+    ENV_GET() {
+        return this.ENV
     }
 
     RUN( initialBox ) {
@@ -18,7 +63,7 @@ class Main {
             app.quit()
         }
 
-        app.on('ready', _ => this.BOXES[initialModule].WINDOW_BUILD())
+        app.on('ready', _ => this.BOXES[initialBox].WINDOW_BUILD())
 
         
         app.on('window-all-closed', () => {
@@ -37,4 +82,4 @@ class Main {
 
 }
 
-module.exports = Main
+module.exports = MAIN

@@ -1,11 +1,17 @@
 const { BrowserWindow } = require("electron")
+const debug = require('debug')('BOX')
 
 class BOX {
 
-    constructor(name, config) {
-        this.name = name
+    constructor(name, config, env) {
+        this.boxName = name
         this.config = config
         this.window = null
+        this.env = env
+
+        debug(this.boxName)
+        debug(this.config)
+        debug(this.window)
     }
 
     WINDOW_BUILD() {
@@ -14,7 +20,9 @@ class BOX {
 
         this.window.loadFile(this.config.render)
 
-        if (this.config.env = "DEV") {
+        this.window.setMenu( this.config.menu )
+
+        if (this.env = "DEV") {
             this.window.webContents.openDevTools()
         }
 
