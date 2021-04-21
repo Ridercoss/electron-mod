@@ -8,10 +8,6 @@ class BOX {
         this.config = config
         this.window = null
         this.env = env
-
-        debug(this.boxName)
-        debug(this.config)
-        debug(this.window)
     }
 
     WINDOW_BUILD() {
