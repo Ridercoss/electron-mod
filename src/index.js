@@ -1,64 +1,31 @@
 const MAIN = require('./classes/MAIN')
 const BOX = require('./modules/BOX')
 const path = require('path')
+const { dialog } = require('electron')
 
 /*
 ** Inicializando APP
 */
-const APP = new MAIN('DEV')
+const APP = new MAIN('PRO')
 
 /*
 ** Registrar BOXES
 ** APP.REG_BOX( <BOX> / <BOX>[] )
 */
 APP.REG_BOX([
-    new BOX('login', {
+    new BOX('resizer', {
         "window": {
-            "title": "Iniciar Sesión",
-            "width": 400,
-            "hieght": 500,
+            "title": "Redimencionar Imagenes",
+            "width": 1080,
+            "hieght": 820,
             "resizable ": false,
-            "maximizable": false,
+            "maximizable": true,
             "webPreferences": {
                 "preload": path.resolve( APP.APP_GET().getAppPath(), "src", "preload.js")
             }
         },
         "menu": null,
-        "render": path.resolve(__dirname, "views", "login.html")
-    },
-    APP.ENV_GET()
-    ),
-    
-    new BOX('about', {
-        "window": {
-            "title": "Acerca de..",
-            "width": 400,
-            "hieght": 500,
-            "resizable ": false,
-            "maximizable": false,
-            "webPreferences": {
-                "preload": path.resolve( APP.APP_GET().getAppPath(), "src", "preload.js")
-            }
-    },
-    "menu": null,
-    "render": path.resolve(__dirname, "views", "about.html")
-    },
-    APP.ENV_GET()
-    ),
-    
-    new BOX('terminal', {
-        "window": {
-            "title": "Terminal",
-            "width": 915,
-            "hieght": 430,
-            "resizable ": false,
-            "maximizable": false,
-            "webPreferences": {
-                "preload": path.resolve( APP.APP_GET().getAppPath(), "src", "preload.js")
-            }
-    },
-    "menu": null,
-    "render": path.resolve(__dirname, "views", "terminal.html")
+        "render": path.resolve(__dirname, "views", "resizer.html")
     },
     APP.ENV_GET()
     )
@@ -69,22 +36,32 @@ APP.REG_BOX([
 ** APP.RUN( <string> )
 ** Donde <string> es el nombre de identificador de BOX
 */
-APP.RUN('login')
+APP.RUN('resizer')
 
-APP.IPC().on('login', (event, args) => {
+APP.IPC().on('app.open.filebrowser', async(event, args) => {
     try {
         
-        console.log(args.user, args.password)
+        if ( args == true ) {
+            let filelists = await dialog.showOpenDialog({"properties": ["openFile", "multiSelections"], "filters": [{ name: 'Images', extensions: ['jpg', 'png', 'jpeg'] }]})
+            console.log( filelists )
+            event.sender.send("app.filebrowser.response", filelists)
+        }
 
     } catch (error) {
         throw error
     }
 })
 
-APP.IPC().on('window.open.about', (event, args) => {
-    APP.OPEN_BOX('about')
-})
+APP.IPC().on('app.output.directory', async(event, args) => {
+    try {
+        
+        if ( args == true ) {
+            let outputdir = await dialog.showOpenDialog({"properties": ["openDirectory"]})
+            console.log( outputdir )
+            event.sender.send("app.outputdir.response", outputdir)
+        }
 
-APP.IPC().on('window.open.terminal', (event, args) => {
-    APP.OPEN_BOX('terminal')
+    } catch (error) {
+        throw error
+    }
 })
